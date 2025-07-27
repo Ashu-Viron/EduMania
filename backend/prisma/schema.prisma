@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estimates     Estimate[]
+  consultations Consultation[]
+
+  @@map("users")
+}
+
+model Estimate {
+  id                String        @id @default(cuid())
+  title             String
+  description       String
+  status            EstimateStatus @default(PENDING)
+  amount            Int
+  estimatedDuration String
+  clientName        String
+  clientEmail       String
+  userId            String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("estimates")
+}
+
+model Consultation {
+  id             String             @id @default(cuid())
+  title          String
+  description    String
+  status         ConsultationStatus @default(SCHEDULED)
+  consultantName String
+  scheduledAt    DateTime
+  duration       Int
+  notes          String?
+  userId         String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("consultations")
+}
+
+enum EstimateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ConsultationStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
