@@ -5,10 +5,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
   helpText?: string
+  icon?: React.ReactNode
+  className?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helpText, id, ...props }, ref) => {
+  ({ className='', label,icon, error, helpText, id, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (

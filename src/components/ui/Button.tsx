@@ -2,7 +2,7 @@ import { forwardRef } from 'react'
 import { clsx } from 'clsx'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'|'error'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'|'error'|'success'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   children: React.ReactNode
@@ -18,6 +18,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
       ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
       error: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+      success: 'bg-green-500 text-white hover:bg-green-600 focus:ring-green-500' // Added success style
     }
 
     const sizes = {
