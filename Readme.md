@@ -106,7 +106,12 @@ Navigate to the project root directory.
     npm run dev
 ```
 The frontend runs at http://localhost:5173.
+## Demo Video
+---------
 
+https://github.com/user-attachments/assets/5a0250a7-2f37-493a-a662-ba5784fc1362
+
+---------
 ## ⚙️ Technical Decisions
 
 - Modular Architecture: Both frontend and backend are structured into distinct, feature-based modules (e.g., auth, estimates, chat), which makes the codebase scalable and easy to maintain.
