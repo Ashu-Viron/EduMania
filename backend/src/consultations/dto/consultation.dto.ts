@@ -1,30 +1,61 @@
-import { IsString, IsNumber, IsEnum, IsOptional, IsDateString } from 'class-validator';
-
-export enum ConsultationStatus {
-  SCHEDULED = 'SCHEDULED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
+import { IsString, IsNotEmpty, IsDateString, IsNumber, Min, IsEnum ,IsOptional} from 'class-validator';
+import { ConsultationStatus } from '@prisma/client';
 
 export class CreateConsultationDto {
+  @IsNotEmpty()
   @IsString()
   title: string;
 
+  @IsNotEmpty()
   @IsString()
   description: string;
 
+  @IsNotEmpty()
   @IsString()
-  consultantName: string;
+  consultantId: string;
 
+  @IsNotEmpty()
   @IsDateString()
   scheduledAt: string;
 
   @IsNumber()
+  @Min(15)
   duration: number;
 
   @IsOptional()
   @IsString()
   notes?: string;
+}
+
+export class UpdateConsultationDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  consultantId?: string;
+
+  @IsOptional()
+  @IsDateString()
+  scheduledAt?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(15)
+  duration?: number;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+  
+  @IsOptional()
+  @IsEnum(ConsultationStatus)
+  status?: ConsultationStatus;
 }
 
 export class UpdateConsultationStatusDto {

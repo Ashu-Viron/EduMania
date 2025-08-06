@@ -1,49 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { EstimatesService } from './estimates.service';
-import { CreateEstimateDto, UpdateEstimateStatusDto } from './dto/estimate.dto';
+import { CreateEstimateDto, UpdateEstimateDto, UpdateEstimateStatusDto } from './dto/estimate.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UserRoleGuard } from '../auth/guards/user-role.guard';
+import { UserRole } from '@prisma/client';
 
+@UseGuards(JwtAuthGuard, new UserRoleGuard(UserRole.USER))
 @Controller('estimates')
-@UseGuards(JwtAuthGuard)
 export class EstimatesController {
   constructor(private readonly estimatesService: EstimatesService) {}
 
   @Post()
-  create(@CurrentUser() user: any, @Body() createEstimateDto: CreateEstimateDto) {
-    return this.estimatesService.create(user.sub, createEstimateDto);
+  create(@Req() req, @Body() createEstimateDto: CreateEstimateDto) {
+    return this.estimatesService.create(req.user.id, createEstimateDto);
   }
 
   @Get()
-  findAll(@CurrentUser() user: any) {
-    return this.estimatesService.findAll(user.sub);
+  findAll(@Req() req) {
+    return this.estimatesService.findAll(req.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.estimatesService.findOne(id, user.sub);
+  findOne(@Param('id') id: string, @Req() req) {
+    return this.estimatesService.findOne(id, req.user.id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Req() req, @Body() updateEstimateDto: UpdateEstimateDto) {
+    return this.estimatesService.update(id, req.user.id, updateEstimateDto);
   }
 
   @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-    @Body() updateStatusDto: UpdateEstimateStatusDto,
-  ) {
-    return this.estimatesService.updateStatus(id, user.sub, updateStatusDto);
+  updateStatus(@Param('id') id: string, @Req() req, @Body() updateStatusDto: UpdateEstimateStatusDto) {
+    return this.estimatesService.updateStatus(id, req.user.id, updateStatusDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.estimatesService.remove(id, user.sub);
+  remove(@Param('id') id: string, @Req() req) {
+    return this.estimatesService.remove(id, req.user.id);
   }
 }

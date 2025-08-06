@@ -1,148 +1,168 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { PrismaClient, UserRole } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Hash password for the user
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  // Clear existing data
+  await prisma.notification.deleteMany();
+  await prisma.consultation.deleteMany();
+  await prisma.estimate.deleteMany();
+  await prisma.consultantProfile.deleteMany();
+  await prisma.user.deleteMany();
 
-  // Seed User
-  const user = await prisma.user.create({
+  console.log('Cleaned up the database.');
+
+  // Create a regular user
+  const user1 = await prisma.user.create({
     data: {
-      id: 'user_1',
-      email: 'new@example.com',
-      password: hashedPassword,
-      name: '김철수',
-      avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
-      createdAt: new Date('2024-01-01T00:00:00Z'),
-      updatedAt: new Date('2024-01-15T00:00:00Z'),
+      email: 'user1@example.com',
+      password: await bcrypt.hash('password123', 10),
+      name: '홍길동',
+      avatar: 'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+      role: UserRole.USER,
+      phone: '010-1234-5678', // NEW: Added phone
+      company: 'Tech Solutions Inc.', // NEW: Added company
     },
   });
 
-  // Seed Estimates
+  // Create a consultant user and their profile
+  const consultantUser1 = await prisma.user.create({
+    data: {
+      email: 'consultant1@example.com',
+      password: await bcrypt.hash('password123', 10),
+      name: '이영희 컨설턴트',
+      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+      role: UserRole.CONSULTANT,
+    },
+  });
+  const consultantProfile1 = await prisma.consultantProfile.create({
+    data: {
+      userId: consultantUser1.id,
+      bio: 'UI/UX 디자인 및 프론트엔드 개발 전문 컨설턴트입니다.',
+      specialties: ['UI/UX Design', 'Frontend Development'],
+      hourlyRate: 150000,
+      isAvailable: true,
+    },
+  });
+
+  // Create more consultants as needed
+  const consultantUser2 = await prisma.user.create({
+    data: {
+      email: 'consultant2@example.com',
+      password: await bcrypt.hash('password123', 10),
+      name: '박민수 컨설턴트',
+      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+      role: UserRole.CONSULTANT,
+    },
+  });
+  const consultantProfile2 = await prisma.consultantProfile.create({
+    data: {
+      userId: consultantUser2.id,
+      bio: '백엔드 아키텍처 및 데이터베이스 최적화 전문입니다.',
+      specialties: ['Backend Architecture', 'Database Optimization'],
+      hourlyRate: 180000,
+      isAvailable: true,
+    },
+  });
+
+  console.log('Created users and consultants.');
+
+  // Create some estimates for user1
   await prisma.estimate.createMany({
     data: [
       {
-        id: 'estimate_1',
-        title: '웹사이트 리뉴얼 프로젝트',
-        description: '기존 웹사이트의 전면적인 리뉴얼 작업입니다. 반응형 디자인과 최신 기술 스택을 적용하여 사용자 경험을 개선합니다.',
+        userId: user1.id,
+        title: '신규 웹사이트 개발 견적',
+        description: '반응형 웹사이트 개발을 위한 견적입니다.',
         status: 'PENDING',
         amount: 5000000,
         estimatedDuration: '4주',
-        clientName: '(주)테크솔루션',
-        clientEmail: 'contact@techsolution.com',
-        userId: user.id,
-        createdAt: new Date('2024-01-10T09:00:00Z'),
-        updatedAt: new Date('2024-01-10T09:00:00Z'),
+        clientName: '김철수',
+        clientEmail: 'chulsoo.kim@example.com',
       },
       {
-        id: 'estimate_2',
-        title: '모바일 앱 개발',
-        description: 'iOS와 Android용 크로스플랫폼 모바일 애플리케이션 개발 프로젝트입니다.',
+        userId: user1.id,
+        title: '모바일 앱 UI/UX 디자인 견적',
+        description: 'iOS/Android 앱 디자인을 위한 견적입니다.',
         status: 'APPROVED',
-        amount: 8000000,
-        estimatedDuration: '8주',
-        clientName: '스타트업 ABC',
-        clientEmail: 'ceo@startupABC.com',
-        userId: user.id,
-        createdAt: new Date('2024-01-08T14:30:00Z'),
-        updatedAt: new Date('2024-01-12T16:45:00Z'),
-      },
-      {
-        id: 'estimate_3',
-        title: 'E-커머스 플랫폼 구축',
-        description: '온라인 쇼핑몰 플랫폼 구축 및 결제 시스템 연동 작업입니다.',
-        status: 'PENDING',
-        amount: 12000000,
-        estimatedDuration: '12주',
-        clientName: '온라인마켓',
-        clientEmail: 'dev@onlinemarket.co.kr',
-        userId: user.id,
-        createdAt: new Date('2024-01-15T11:15:00Z'),
-        updatedAt: new Date('2024-01-15T11:15:00Z'),
-      },
-      {
-        id: 'estimate_4',
-        title: '데이터 분석 대시보드',
-        description: '실시간 데이터 시각화 및 분석 대시보드 개발 프로젝트입니다.',
-        status: 'REJECTED',
         amount: 3500000,
-        estimatedDuration: '6주',
-        clientName: '데이터텍',
-        clientEmail: 'project@datatech.com',
-        userId: user.id,
-        createdAt: new Date('2024-01-05T13:20:00Z'),
-        updatedAt: new Date('2024-01-07T10:30:00Z'),
+        estimatedDuration: '2주',
+        clientName: '김철수',
+        clientEmail: 'chulsoo.kim@example.com',
+      },
+      {
+        userId: user1.id,
+        title: '서버 아키텍처 설계 견적',
+        description: '클라우드 기반 서버 설계 컨설팅 견적입니다.',
+        status: 'REJECTED',
+        amount: 7000000,
+        estimatedDuration: '3주',
+        clientName: '김철수',
+        clientEmail: 'chulsoo.kim@example.com',
       },
     ],
-    skipDuplicates: true,
   });
 
-  // Seed Consultations
+  // Create some consultations for user1 and consultant1
   await prisma.consultation.createMany({
     data: [
       {
-        id: 'consult_1',
-        title: '프로젝트 초기 상담',
-        description: '웹사이트 리뉴얼 프로젝트에 대한 초기 요구사항 논의 및 기술 스택 검토',
-        status: 'COMPLETED',
-        consultantName: '이영희 컨설턴트',
-        scheduledAt: new Date('2024-01-09T10:00:00Z'),
-        duration: 60,
-        notes: '클라이언트의 요구사항을 명확히 파악했으며, React와 Node.js 기반의 기술 스택으로 진행하기로 결정했습니다.',
-        userId: user.id,
-        createdAt: new Date('2024-01-08T09:00:00Z'),
-        updatedAt: new Date('2024-01-09T11:00:00Z'),
-      },
-      {
-        id: 'consult_2',
-        title: '모바일 앱 기획 상담',
-        description: 'iOS/Android 앱 개발을 위한 기획 단계 상담 및 UX/UI 검토',
+        userId: user1.id,
+        consultantId: consultantProfile1.id,
+        title: '프로젝트 초기 컨설팅',
+        description: '새로운 프로젝트의 방향성을 논의하는 자리입니다.',
         status: 'SCHEDULED',
-        consultantName: '박민수 컨설턴트',
-        scheduledAt: new Date('2024-01-20T14:00:00Z'),
-        duration: 90,
-        userId: user.id,
-        createdAt: new Date('2024-01-15T16:30:00Z'),
-        updatedAt: new Date('2024-01-15T16:30:00Z'),
+        scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        duration: 60,
+        notes: '클라이언트가 UI/UX에 관심이 많음.',
       },
       {
-        id: 'consult_3',
-        title: '기술 아키텍처 리뷰',
-        description: 'E-커머스 플랫폼의 기술 아키텍처 및 확장성에 대한 전문가 리뷰',
+        userId: user1.id,
+        consultantId: consultantProfile2.id,
+        title: '데이터베이스 설계 검토',
+        description: '기존 데이터베이스 설계의 성능 개선 방안을 찾습니다.',
         status: 'COMPLETED',
-        consultantName: '최기술 시니어 컨설턴트',
-        scheduledAt: new Date('2024-01-16T15:30:00Z'),
-        duration: 120,
-        notes: '마이크로서비스 아키텍처 도입을 권장하며, 단계적 마이그레이션 계획을 수립했습니다.',
-        userId: user.id,
-        createdAt: new Date('2024-01-14T10:00:00Z'),
-        updatedAt: new Date('2024-01-16T17:30:00Z'),
+        scheduledAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
+        duration: 90,
+        notes: 'NoSQL 도입을 제안함.',
       },
       {
-        id: 'consult_4',
-        title: '프로젝트 킥오프 미팅',
-        description: '승인된 프로젝트의 킥오프 미팅 및 개발 일정 협의',
-        status: 'CANCELLED',
-        consultantName: '김프로 프로젝트 매니저',
-        scheduledAt: new Date('2024-01-18T09:00:00Z'),
+        userId: user1.id,
+        consultantId: consultantProfile1.id,
+        title: '최근 UX 트렌드 분석',
+        description: '최신 UX 트렌드에 대한 컨설팅 요청입니다.',
+        status: 'COMPLETED',
+        scheduledAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
         duration: 45,
-        notes: '클라이언트 사정으로 인해 연기되었습니다.',
-        userId: user.id,
-        createdAt: new Date('2024-01-12T14:00:00Z'),
-        updatedAt: new Date('2024-01-17T18:00:00Z'),
+        notes: '피드백이 좋았음.',
       },
     ],
-    skipDuplicates: true,
   });
 
-  console.log('Database seeded successfully!');
+  // Create some notifications for user1
+  await prisma.notification.createMany({
+    data: [
+      { userId: user1.id, title: 'Your estimate for "New Website" has been approved.', read: false },
+      { userId: user1.id, title: 'Consultation with Consultant Jane is scheduled for tomorrow.', read: false },
+      { userId: user1.id, title: 'Welcome to the platform! Enjoy your experience.', read: true },
+    ],
+  });
+
+  // Create some notifications for consultant1
+  await prisma.notification.createMany({
+    data: [
+      { userId: consultantUser1.id, title: 'New consultation request from Hong Gil Dong.', read: false },
+      { userId: consultantUser1.id, title: 'You have a consultation with Hong Gil Dong next week.', read: true },
+    ],
+  });
+
+  console.log('Seeded the database.');
 }
 
 main()
-  .catch(e => {
-    console.error('Seeding error:', e);
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

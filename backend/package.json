@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "prisma": {
-  "seed": "node ./seed.ts"
+    "seed": "node ./seed.ts"
   },
   "scripts": {
     "build": "nest build",
@@ -27,12 +27,16 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
-    "@nestjs/platform-express": "^10.0.0",
     "@nestjs/config": "^3.1.1",
+    "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
+    "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^10.0.2",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.4.20",
+    "@nestjs/websockets": "^10.4.20",
     "@prisma/client": "^5.7.1",
+    "@types/multer": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
